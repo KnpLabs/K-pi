@@ -1,0 +1,43 @@
+---
+reports:
+  github-security:
+    extra:
+      Total: total
+    colors:
+      LOW: '#808080'
+      MODERATE: '#FFFF00'
+      HIGH: '#FFC100'
+      CRITICAL: '#FF0000'
+    storage:
+      github-discussion:
+        url: https://github.com/KnpLabs/K-pi/discussions/4
+  coverage:
+    storage:
+      github-discussion:
+        url: https://github.com/KnpLabs/K-pi/discussions/1
+    check-reporter:
+      github-status:
+        states: higher-is-better
+        unit: '%'
+  outdated-dependencies:
+    storage:
+      github-discussion:
+        url: https://github.com/KnpLabs/K-pi/discussions/2
+    check-reporter:
+      github-status:
+        states: lower-is-better
+        unit:
+          singular: ' dependency'
+          plural: ' dependencies'
+  class-bugs:
+    storage:
+      github-discussion:
+        url: https://github.com/KnpLabs/K-pi/discussions/3
+    check-reporter:
+      github-status:
+        states:
+          on-lower: success
+          on-higher: success
+        unit:
+          singular: ' bug'
+          plural: ' bugs'

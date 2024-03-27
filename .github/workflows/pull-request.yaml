@@ -1,0 +1,39 @@
+---
+on: pull_request
+
+permissions:
+  statuses: write
+
+jobs:
+  autoformat:
+    runs-on: ubuntu-latest
+    env:
+      COMPOSE_FILE: tests/compose.yaml
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+      - name: make autoformat
+        run: make autoformat > /dev/null
+      - name: git status
+        run: |
+          if [ -z $(git status --porcelain) ];
+          then
+            echo "Looks good"
+          else
+            echo "Some files need to be corrected, so run 'make autoformat' to apply a correction"
+            echo git status
+            exit 1
+          fi
+  phpmetrics:
+    uses: ./.github/workflows/example-phpmetrics.yaml
+    with:
+      command: check
+  coverage:
+    uses: ./.github/workflows/example-coverage.yaml
+    with:
+      command: check

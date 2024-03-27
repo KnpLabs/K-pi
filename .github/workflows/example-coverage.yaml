@@ -1,0 +1,29 @@
+---
+on:
+  workflow_call:
+    inputs:
+      command:
+        type: string
+        required: true
+
+jobs:
+  phpspec:
+    runs-on: ubuntu-latest
+    env:
+      COMPOSE_FILE: tests/compose.yaml
+    steps:
+      - uses: actions/checkout@v4
+      - run: make phpspec
+      - name: XPath
+        id: xpath
+        run: |
+          sudo apt-get install -y libxml-xpath-perl
+
+          PERCENT=$(cat coverage/phpspec/index.xml | xpath -q -e '/phpunit/project/directory[@name="/"]/totals/lines/@percent' | cut -f 2 -d "=" | tr -d \")
+
+          echo "phpspec=${PERCENT}" > $GITHUB_OUTPUT
+      - uses: KnpLabs/K-pi@v0.1.0
+        with:
+          report: coverage
+          command: ${{ inputs.command }}
+          values: ${{ toJson(steps.xpath.outputs) }}
