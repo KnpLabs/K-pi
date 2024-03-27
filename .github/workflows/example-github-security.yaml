@@ -52,7 +52,7 @@ jobs:
 
             return countBySeverity;
       - uses: actions/checkout@v4
-      - uses: PedroTroller/K-pi@v1.1.0
+      - uses: PedroTroller/K-pi@v1.2.0
         with:
           report: github-security
           command: compile
