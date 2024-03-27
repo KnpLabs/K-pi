@@ -1,0 +1,59 @@
+---
+on: workflow_call
+
+jobs:
+  metric:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        id: script
+        with:
+          script: |
+            const query = `
+              query($cursor: String, $owner: String!, $repo: String!) {
+                repository(owner: $owner, name: $repo) {
+                  vulnerabilityAlerts(states: OPEN, first: 100, after: $cursor) {
+                    pageInfo {
+                      endCursor
+                    }
+                    nodes {
+                      securityVulnerability {
+                        severity
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+
+            let cursor = null;
+            const countBySeverity = {CRITICAL: 0, HIGH: 0, MODERATE: 0, LOW: 0};
+
+            do {
+                const result = await github.graphql(
+                  query,
+                  {
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    cursor: cursor,
+                  }
+                );
+
+                for(const alert of result.repository.vulnerabilityAlerts.nodes) {
+                    if (!countBySeverity[alert.securityVulnerability.severity]) {
+                        countBySeverity[alert.securityVulnerability.severity] = 0;
+                    }
+
+                    countBySeverity[alert.securityVulnerability.severity]++;
+                }
+
+                cursor = result.repository.vulnerabilityAlerts.pageInfo.endCursor;
+            } while(null !== cursor)
+
+            return countBySeverity;
+      - uses: actions/checkout@v4
+      - uses: PedroTroller/K-pi@v1.1.0
+        with:
+          report: github-security
+          command: compile
+          values: ${{ steps.script.outputs.result }}

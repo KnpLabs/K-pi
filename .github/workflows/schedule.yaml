@@ -1,0 +1,16 @@
+---
+on:
+  schedule:
+    - cron: '0 6 * * 1-5' # Mon to Fri at 8:00 (Paris GMT+2)
+
+jobs:
+  github-security:
+    uses: ./.github/workflows/example-github-security.yaml
+  phpmetrics:
+    uses: ./.github/workflows/example-phpmetrics.yaml
+    with:
+      command: compile
+  coverage:
+    uses: ./.github/workflows/example-coverage.yaml
+    with:
+      command: compile

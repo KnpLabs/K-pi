@@ -1,0 +1,17 @@
+---
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  github-security:
+    uses: ./.github/workflows/example-github-security.yaml
+  phpmetrics:
+    uses: ./.github/workflows/example-phpmetrics.yaml
+    with:
+      command: compile
+  coverage:
+    uses: ./.github/workflows/example-coverage.yaml
+    with:
+      command: compile

@@ -1,0 +1,13 @@
+---
+formatter.name: pretty
+
+extensions:
+  FriendsOfPhpSpec\PhpSpec\CodeCoverage\CodeCoverageExtension:
+    format:
+      - text
+      - html
+      - xml
+    output:
+      html: coverage/phpspec
+      xml: coverage/phpspec
+    show_only_summary: true

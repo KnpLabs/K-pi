@@ -1,0 +1,15 @@
+#!/usr/bin/env php
+<?php
+use App\Command\CheckCommand;
+use App\Command\CompileCommand;
+use App\Template;
+use Github\Client;
+use K_pi\Container\Definitions;
+use Symfony\Component\Console\Application;
+
+require dirname(__DIR__) . "/vendor/autoload.php";
+
+K_pi\Container\Definitions::build()
+    ->get(Symfony\Component\Console\Application::class)
+    ->run();
+

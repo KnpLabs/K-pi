@@ -1,0 +1,42 @@
+---
+name: PedroTroller/K-pi
+description: Compile, verify and publish metrics
+branding:
+  color: red
+  icon: thermometer
+inputs:
+  command:
+    required: true
+    type: 'string'
+  configuration:
+    description: 'The configuration'
+    required: false
+    type: 'string'
+  configuration_file:
+    description: 'The path to the configuration file'
+    required: false
+    default: '.k-pi.dist.yaml'
+    type: 'string'
+  report:
+    description: 'One of the report names configured in the configuration file'
+    required: true
+    type: 'string'
+  values:
+    description: 'The metric value read (int|float of list of int|float)'
+    required: true
+  github_token:
+    description: The GitHub token used to create an authenticated client
+    default: ${{ github.token }}
+    required: false
+  github_pull_request:
+    default: ${{ github.event.pull_request.html_url }}
+    required: false
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.command }}
+    - ${{ inputs.report }}
+    - ${{ inputs.values }}
+    - '--configuration-file'
+    - ${{ inputs.configuration_file }}

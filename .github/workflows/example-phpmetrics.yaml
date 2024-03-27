@@ -1,0 +1,57 @@
+---
+on:
+  workflow_call:
+    inputs:
+      command:
+        type: string
+        required: true
+
+jobs:
+  phpmetrics:
+    runs-on: ubuntu-latest
+    outputs:
+      report: ${{ steps.phpmetrics.outputs.result }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: latest
+          tools: phpmetrics/phpmetrics
+      - name: Compile
+        run: |
+          mkdir phpmetrics -p
+          phpmetrics src --report-html=phpmetrics --report-json=phpmetrics/report.json
+
+          echo "report=$(cat phpmetrics/report.json | jq . --compact-output)" > $GITHUB_OUTPUT
+      - name: Dump
+        id: phpmetrics
+        uses: actions/github-script@v7
+        with:
+          script: return require('./phpmetrics/report.json');
+
+  report:
+    name: ${{ matrix.report }}
+    runs-on: ubuntu-latest
+    needs: phpmetrics
+    strategy:
+      matrix:
+        include:
+          - report: outdated-dependencies
+            query: '{"composer.json": .composer.packages|map(select(.status=="outdated"))|length}'
+          - report: class-bugs
+            query: '. | to_entries | map({key: .key, value: .value.bugs}) | map(select(.value != null)) | from_entries'
+    steps:
+      - name: jq
+        id: jq
+        env:
+          QUERY: ${{ matrix.query }}
+          REPORT: ${{ needs.phpmetrics.outputs.report }}
+        run: |
+          echo $REPORT > /tmp/report.json
+          echo report=$(cat /tmp/report.json | jq "$QUERY" --compact-output --raw-output) > $GITHUB_OUTPUT
+      - uses: actions/checkout@v4
+      - uses: PedroTroller/K-pi@v1.1.0
+        with:
+          report: ${{ matrix.report }}
+          command: ${{ inputs.command }}
+          values: ${{ steps.jq.outputs.report }}
